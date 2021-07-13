@@ -2,37 +2,33 @@ import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 import {
-  Container,
   Typography,
   Button,
   Icon,
   Paper,
   Box,
   TextField,
-  Checkbox,
 } from "@material-ui/core";
 
 const useStyles = makeStyles({
   addTodoContainer: { padding: 10 },
-  addTodoButton: { marginLeft: 5 },
+  addClearButton: { marginLeft: 5 },
   todoTextField: { width: '50%', padding: 5 },
   
 });
 
 const DateFilter = (props)=> {
   const classes = useStyles();
-  const [todos, setTodos] = useState([]);
-
-  useEffect(() => {
-    fetch("http://localhost:3030/")
-      .then((response) => response.json())
-      .then((todos) => setTodos(todos));
-      console.log(todos);
-  }, [setTodos]);
 
   const dropdownChangeHandler = (event) => {
-    props.onChangeFilter(event.target.value);
-  }; 
+    const filterDate = new Date(event.target.value)
+    const finalDate = filterDate.getFullYear()+'-'+(filterDate.getMonth()+1)+'-'+filterDate.getDate()
+    props.onChangeFilter(finalDate.toString());
+  };
+
+  const clearDateHandler = (event) => {
+    props.onChangeFilter('');
+  }
 
   return (
       <React.Fragment>
@@ -51,8 +47,18 @@ const DateFilter = (props)=> {
                 shrink: true,
                 }}
                 onChange={dropdownChangeHandler}
+                title="dateFilter"
       />
           </Box>
+          <Button
+          className={classes.addClearButton}
+          startIcon={<Icon>clear</Icon>}
+          onClick={() => clearDateHandler()}
+          title="clearDate"
+          data-testid="clearDate"
+        >
+          Clear
+        </Button>
         </Box>
       </Paper>
     </React.Fragment>

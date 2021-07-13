@@ -2,15 +2,10 @@ import { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import NewTodo from "./NewTodo";
 import DateFilter from "../DateFilter/DateFilter";
+import TodoList from "./TodoList";
 import {
   Container,
   Typography,
-  Button,
-  Icon,
-  Paper,
-  Box,
-  TextField,
-  Checkbox,
 } from "@material-ui/core";
 
 const useStyles = makeStyles({
@@ -41,28 +36,56 @@ const useStyles = makeStyles({
 function Todos() {
   const classes = useStyles();
   const [todos, setTodos] = useState([]);
+  const [filterDate, setFilterDate] = useState([]);
+
 
   useEffect(() => {
     fetch("http://localhost:3030/")
       .then((response) => response.json())
       .then((todos) => setTodos(todos));
-      console.log(todos);
   }, [setTodos]);
 
-  function filterToDo(date) {
-    fetch("http://localhost:3030", {
-      headers:{
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    method: "GET",
-    body: JSON.stringify({ date }),
-  })
+  // a function that will help us reorder the list
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
   
-    .then((response) => response.json())
-    .then((todo) => setTodos([...todos, todo]));
-   
-}
+    return result;
+  };
+
+  // the function that will run when the dragging is over
+  const onDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const newList = reorder(
+      todos,
+      result.source.index,
+      result.destination.index
+    );
+
+    setTodos(newList);
+  };
+
+  // a function that will help us get the date selected to filter
+  const filterChangeHandler = (selectedDate) => {
+    setFilterDate(selectedDate);
+  };
+
+  // a function to filter through the date chosen or if none
+  const filteredData = todos.filter( todo =>{
+    //if selectedYear length is less that 1 get inital state
+    if (filterDate < 1)
+    {
+      return todos;
+    }
+    else{
+      return todo.date == filterDate;
+    }
+    
+  });
 
   function addTodo(todoData) {
     fetch("http://localhost:3030/", {
@@ -108,54 +131,13 @@ function Todos() {
 
   return (
     <Container maxWidth="md">
-      <DateFilter />
-      <Typography variant="h3" component="h1" gutterBottom>
+      
+      <DateFilter onChangeFilter={filterChangeHandler}/>
+      <Typography variant="h3" component="h1" gutterBottom title="testTodo">
         Todos
       </Typography>
       <NewTodo onSaveChangeHandler={addTodo}/>
-      {todos.length > 0 && (
-        <Paper className={classes.todosContainer}>
-          <Box display="flex" flexDirection="column" alignItems="stretch">
-            {todos.map(({ id, text, date, completed }) => (
-              <Box
-                key={id}
-                display="flex"
-                flexDirection="row"
-                alignItems="center"
-                className={classes.todoContainer}
-              >
-                <Checkbox
-                  checked={completed}
-                  onChange={() => toggleTodoCompleted(id)}
-                ></Checkbox>
-                <Box flexGrow={1}>
-                  <Typography
-                    className={completed ? classes.todoTextCompleted : ""}
-                    variant="body1"
-                  >
-                    {text}
-              
-                  </Typography>
-                  <Typography
-                    className={completed ? classes.todoTextCompleted : ""}
-                    variant="body1"
-                  >
-                    {date}
-              
-                  </Typography>
-                </Box>
-                <Button
-                  className={classes.deleteTodo}
-                  startIcon={<Icon>delete</Icon>}
-                  onClick={() => deleteTodo(id)}
-                >
-                  Delete
-                </Button>
-              </Box>
-            ))}
-          </Box>
-        </Paper>
-      )}
+      <TodoList todos={filteredData} completeTodo={toggleTodoCompleted} deleteTodo={deleteTodo} onDragEnd={onDragEnd}/>
     </Container>
   );
 }

@@ -34,15 +34,21 @@ app.post('/', async (req, res) => {
   const { text } = req.body;
   const { date } = req.body;
 
- if (typeof text !== 'string') {
+ if (typeof text !== 'string' ) {
    console.log("You are in the error");
      res.status(400);
      res.json({ message: "invalid 'text' expected string" });
      return;
    }
+if (text.trim() > 1 ) {
+      res.status(400);
+      res.json({ message: "Todo is too short" });
+      return;
+    }
+  const todos = database.client.db('todos').collection('todos');
    
-  const todo = { id: generateId(), text, date, completed: false };
-  await database.client.db('todos').collection('todos').insertOne(todo);
+  const todo = {  id: generateId(), text, date, completed: false };
+  await todos.insertOne(todo);
   res.status(201);
   res.json(todo);
 });
@@ -69,5 +75,6 @@ app.delete('/:id', async (req, res) => {
   res.status(203);
   res.end();
 });
+
 
 module.exports = app;

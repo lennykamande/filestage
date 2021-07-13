@@ -1,8 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import Todos from "./Todo/Todos";
-import DateFilter from "./DateFilter/DateFilter"
+import Todos from "./Components/Todo/Todos";
 
 ReactDOM.render(
   <React.StrictMode>

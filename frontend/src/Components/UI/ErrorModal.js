@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// a function that pops the error modal when there's an error in input
 const ErrorModal = (props) => {
   const classes = useStyles();
   const [open, setOpen] = useState(true);
@@ -26,8 +27,9 @@ const ErrorModal = (props) => {
     setOpen(false);
   };
 
+  // use of a portal is encourage for best practises
   return (
-    <div>
+    <React.Fragment>
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -42,12 +44,12 @@ const ErrorModal = (props) => {
       >
         <Fade in={open}>
           <div className={classes.paper}>
-            <h2 id="transition-modal-title">{props.title}</h2>
+            <h2 id="transition-modal-title" data-testid="id-message">{props.title}</h2>
             <p id="transition-modal-description">{props.message}</p>
           </div>
         </Fade>
       </Modal>
-    </div>
+      </React.Fragment>
   );
 }
 
